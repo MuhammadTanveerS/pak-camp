@@ -1,9 +1,11 @@
 const express = require("express");
 const methodOverride = require("method-override");
 const { default: mongoose } = require("mongoose");
+const ejsMate = require('ejs-mate')
 const app = express();
 const path = require('path');
 const Campground = require("./models/Campground");
+
 
 
 
@@ -15,6 +17,7 @@ mongoose.connect('mongodb://localhost:27017/casual-camp')
     console.log(err)
 })
 
+app.engine('ejs',ejsMate)
 app.set('view engine','ejs')
 app.set('views',path.join(__dirname,'views'));
 

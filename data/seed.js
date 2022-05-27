@@ -17,10 +17,15 @@ const seed = async ()=>{
     await Campground.deleteMany({});
     for(let i=0; i<50;i++){
         const r = Math.floor(Math.random()*1000);
+        const price = Math.floor(Math.random()*20)+10;
         const camp = new Campground({
             
             title:`${getTitle(descriptors)} ${getTitle(places)} `,
-            location:`${cities[r].city} , ${cities[r].state} `
+            location:`${cities[r].city} , ${cities[r].state} `,
+            image:'http://source.unsplash.com/collection/483251',
+            description:"Lorem ipsum dolor sit amet consectetur adipisicing elit. Optio aspernatur ipsum sit voluptate, dolores, totam accusamus non aliquam, distinctio vel nemo facilis. Repudiandae tempore culpa ducimus fugit aliquam esse ratione?",
+            price
+
         })
         await camp.save();
     }
