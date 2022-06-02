@@ -7,7 +7,8 @@ const path = require('path');
 const catchAsync = require('./utils/catchAsync')
 const Campground = require("./models/Campground");
 const ExpressError = require("./utils/ExpressError"); 
-const {campgroundSchema} = require('./schemas')
+const {campgroundSchema, reviewSchema} = require('./schemas')
+const Review = require('./models/review')
 
 
 
@@ -42,6 +43,17 @@ const validateCamp = (req,res,next) =>{
     console.log(result);
 }
 
+const validateReview = (req,res,next) =>{
+    const {error} = reviewSchema.validate(req.body);
+    if(error){
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg,400)
+    }else{
+        next();
+    }
+    // console.log(result);
+}
+
 app.get('/campgrounds', catchAsync(async (req,res)=>{
     const camps = await Campground.find({});
     res.render('campgrounds/home',{camps});
@@ -60,7 +72,7 @@ app.post('/campgrounds', validateCamp, catchAsync(async (req,res,next)=>{
 
 
 app.get('/campgrounds/:id',  catchAsync(async (req,res)=>{
-    const camp = await Campground.findById(req.params.id);
+    const camp = await Campground.findById(req.params.id).populate('reviews');
     res.render('campgrounds/show',{camp});
 }))
 
@@ -78,6 +90,15 @@ app.delete('/campgrounds/:id', validateCamp, catchAsync(async (req,res)=>{
     const {id} = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds')
+}))
+
+app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req,res) => {
+    const camp = await Campground.findById(req.params.id)
+    const review = new Review(req.body.review);
+    camp.reviews.push(review);
+    await review.save();
+    await camp.save();
+    res.redirect(`/campgrounds/${camp._id}`);
 }))
 
 app.all('*',(req,res,next)=>{
